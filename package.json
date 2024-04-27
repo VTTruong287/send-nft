@@ -1,0 +1,22 @@
+{
+  "name": "send-nft",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "ts-node -r tsconfig-paths/register src/index"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.5",
+    "dotenv": "^16.4.0",
+    "web3": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/async": "^3.2.24",
+    "@types/node": "^20.11.28",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.4.4"
+  }
+}
