@@ -30,19 +30,26 @@ export default class SpreadSheet {
         if (idx == 0) return;
         const columns = row.replace("\r", "").replace("\n", "").split(",")
         try {
-          // Check the amount is number
-          // parseFloat(columns[0]?.trim())
+          // Check and parse the amount
+          const natureAmount = BigInt(columns[2]?.trim())
+          const fireAmount = BigInt(columns[3]?.trim())
+          const waterAmount = BigInt(columns[4]?.trim())
+          const earthAmount = BigInt(columns[5]?.trim())
+          const darkAmount = BigInt(columns[6]?.trim())
+          const lightningAmount = BigInt(columns[7]?.trim())
+          const aetherAmount = BigInt(columns[8]?.trim())
+
           this.rows.push({
             address: columns[0]?.trim(),
             points: columns[1]?.trim(),
 
-            nature: columns[2]?.trim(),
-            fire: columns[3]?.trim(),
-            water: columns[4]?.trim(),
-            earth: columns[5]?.trim(),
-            dark: columns[6]?.trim(),
-            lightning: columns[7]?.trim(),
-            aether: columns[8]?.trim(),
+            nature: natureAmount,
+            fire: fireAmount,
+            water: waterAmount,
+            earth: earthAmount,
+            dark: darkAmount,
+            lightning: lightningAmount,
+            aether: aetherAmount,
 
             transactionId: "",
             status: ProcessStatusEnum.NONE,
@@ -59,7 +66,7 @@ export default class SpreadSheet {
         }
       })
       
-      console.log("content: ", this.rows)
+      // console.log("content: ", this.rows)
     } catch(error) {
       console.log('--- getData - Error: ', error)
     }

@@ -5,18 +5,18 @@ export const TransactionReceiptStatus = {
     FAIL: 0n
 }
 
-export enum TokenID {
-    NATURE = 1,
-    FIRE = 2,
-    WATER = 3,
-    EARTH = 4,
+export const TokenID ={
+    NATURE: 1n,
+    FIRE: 2n,
+    WATER: 3n,
+    EARTH: 4n,
 
-    DARK = 5,
-    LIGHTNING = 6,
-    AETHER = 7,
+    DARK: 5n,
+    LIGHTNING: 6n,
+    AETHER: 7n,
     
-    SPACE = 8,
-    TIME = 9,
-    PNEUMA = 10,
-    CHAOS = 11
+    SPACE: 8n,
+    TIME: 9n,
+    PNEUMA: 10n,
+    CHAOS: 11n
 }
