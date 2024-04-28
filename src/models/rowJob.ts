@@ -4,13 +4,15 @@ import { extractTokenIdAndAmount } from "@src/ultils";
 import { ProcessStatusEnum, Row } from "./row";
 
 export default class RowJob {
+  public index: number;
   public retry: number;
   public row: Row;
   public blockchain: Blockchain;
 
   public fromAddress: string;
 
-  constructor(row: Row, blockchain: Blockchain, fromAddress: string) {
+  constructor(index: number, row: Row, blockchain: Blockchain, fromAddress: string) {
+    this.index = index;
     this.retry = 0;
     this.row = row;
     this.blockchain = blockchain;
@@ -27,7 +29,12 @@ export default class RowJob {
     const { tokenIds, amounts: transferAmounts } = extractTokenIdAndAmount(this.row);
 
     while (this.retry < MAX_RETRY_LIMIT && this.row.status == ProcessStatusEnum.NONE) {
-      console.log("--- process: ", this.row.address, this.retry);
+      console.log("--- process: ", this.index, this.row.address, this.retry);
+      if (tokenIds.length == 0) {
+        this.row.errorMsg = "Amounts are zero";
+        this.row.status = ProcessStatusEnum.SUCCESS;
+        return;
+      }
       const data = await this.blockchain.safeBatchTransferFrom(
         this.fromAddress,
         process.env.PRIVATE_KEY,
@@ -52,11 +59,11 @@ export default class RowJob {
       }
       this.retry++;
 
-      // await new Promise((resolve, reject) =>
-      //   setTimeout(() => {
-      //     resolve(null);
-      //   }, 500)
-      // );
+      await new Promise((resolve, reject) =>
+        setTimeout(() => {
+          resolve(null);
+        }, 1000)
+      );
     }
   }
 }

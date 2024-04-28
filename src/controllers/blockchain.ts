@@ -66,7 +66,7 @@ export default class Blockchain {
       // const transfer = this.contract.methods.mint(fromAddress, ids[0], amounts[0], []);
       const encodedABI = transfer.encodeABI();
 
-      const gasLimit = 584000n; // Gas limit
+      const gasLimit = 21000n * 15n; // Gas limit
       const gasPrice = await this.provider.eth.getGasPrice();
 
       const tx = {
@@ -112,7 +112,7 @@ export default class Blockchain {
       // const transfer = this.contract.methods.mint(fromAddress, ids[0], amounts[0], []);
       const encodedABI = transfer.encodeABI();
 
-      const gasLimit = 584000n; // Gas limit
+      const gasLimit = 21000n * 15n; // Gas limit
       const gasPrice = await this.provider.eth.getGasPrice();
 
       const tx = {

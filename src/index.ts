@@ -1,3 +1,4 @@
+import async from "async";
 import path from "path";
 
 import ContractABI from './consts/abi.json';
@@ -13,7 +14,7 @@ import { extractTokenIdAndAmount } from "./ultils";
 const main = async () => {
   const fromAddress = process.env.FROM_ADDRESS;
   const privateKey = process.env.PRIVATE_KEY;
-  const contractAddress = process.env.CONTRACT_ADDRESS;
+  const contractAddress = !!process.env.TEST_MODE ? process.env.CONTRACT_ADDRESS_TEST_PROXY : process.env.CONTRACT_ADDRESS_MAIN_PROXY;
   const network = !!process.env.TEST_MODE ? SepoliaARB : ARB
   console.log(" ********** Send crypto - Start ", network);
 
@@ -38,8 +39,8 @@ const main = async () => {
   // const mintAmounts = [spreadSheet.rows[0].nature, spreadSheet.rows[0].fire, spreadSheet.rows[0].water, spreadSheet.rows[0].earth, spreadSheet.rows[0].dark, spreadSheet.rows[0].lightning, spreadSheet.rows[0].aether]
   const {tokenIds, amounts: mintAmounts} = extractTokenIdAndAmount(spreadSheet.rows[0])
   const addresses = tokenIds.map(() => fromAddress)
-  const originBalances = await blockchain.getBalances(addresses, tokenIds)
   const rowJobs: RowJob[] = [];
+  const originBalances = await blockchain.getBalances(addresses, tokenIds)
 
   console.log('originBalances: ', originBalances)
   if (originBalances?.length == 0) throw Error('--- Error getBalances')
@@ -51,8 +52,8 @@ const main = async () => {
   }
   console.log('Mint successfully ')
 
-  // TODO: Quantity Checking Loop when mint successfully
-  // ...
+  // // TODO: Quantity Checking Loop when mint successfully
+  // // ...
   const afterMintBalances = await blockchain.getBalances(addresses, tokenIds)
   if (afterMintBalances?.length == 0) throw Error('--- Error getBalances')
   console.log('afterMintBalances: ', afterMintBalances)
@@ -69,15 +70,21 @@ const main = async () => {
   // Transfer
   // Skip idx = 0: total row
   for (let i = 1; i < spreadSheet.rows.length; i++) {
-    rowJobs.push(new RowJob(spreadSheet.rows[i], blockchain, fromAddress));
+    rowJobs.push(new RowJob(i, spreadSheet.rows[i], blockchain, fromAddress));
   }
 
+  // Single thread process
   for (let rowJob of rowJobs) {
     await rowJob.process();
   }
   
   // TODO: paralell process
   // ...
+  // await async.parallelLimit(rowJobs.map((rowJob: RowJob) => {
+  //   return async () => {
+  //     await rowJob.process();
+  //   }
+  // }), 10)
 
   const afterTransferBalances = await blockchain.getBalances(addresses, tokenIds)
   if (afterTransferBalances?.length == 0) throw Error('--- Error getBalances')
