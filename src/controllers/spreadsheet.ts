@@ -28,16 +28,22 @@ export default class SpreadSheet {
 
       rows?.forEach((row, idx) => {
         if (idx == 0) return;
-        const columns = row.replace("\r", "").replace("\n", "").split(",")
+        const columns = row.replace("\r", "").replace("\n", "").split(",");
         try {
+          let status = ProcessStatusEnum.NONE;
+          let errorMsg = "";
+          if (!columns[0]?.trim() && idx != 1) {
+            status = ProcessStatusEnum.FAIL;
+            errorMsg = "Empty address";
+          }
           // Check and parse the amount
-          const natureAmount = BigInt(columns[2]?.trim())
-          const fireAmount = BigInt(columns[3]?.trim())
-          const waterAmount = BigInt(columns[4]?.trim())
-          const earthAmount = BigInt(columns[5]?.trim())
-          const darkAmount = BigInt(columns[6]?.trim())
-          const lightningAmount = BigInt(columns[7]?.trim())
-          const aetherAmount = BigInt(columns[8]?.trim())
+          const natureAmount = BigInt(columns[2]?.trim());
+          const fireAmount = BigInt(columns[3]?.trim());
+          const waterAmount = BigInt(columns[4]?.trim());
+          const earthAmount = BigInt(columns[5]?.trim());
+          const darkAmount = BigInt(columns[6]?.trim());
+          const lightningAmount = BigInt(columns[7]?.trim());
+          const aetherAmount = BigInt(columns[8]?.trim());
 
           this.rows.push({
             address: columns[0]?.trim(),
@@ -52,23 +58,23 @@ export default class SpreadSheet {
             aether: aetherAmount,
 
             transactionId: "",
-            status: ProcessStatusEnum.NONE,
-            errorMsg: ""
-          })
+            status,
+            errorMsg,
+          });
         } catch (error) {
           this.rows.push({
             address: columns[0],
             points: columns[1],
             transactionId: "",
             status: ProcessStatusEnum.FAIL,
-            errorMsg: "Error when get Data"
-          })
+            errorMsg: "Error when get Data",
+          });
         }
-      })
-      
+      });
+
       // console.log("content: ", this.rows)
-    } catch(error) {
-      console.log('--- getData - Error: ', error)
+    } catch (error) {
+      console.log("--- getData - Error: ", error);
     }
   }
 
@@ -103,7 +109,7 @@ export default class SpreadSheet {
         await fs.promises.mkdir(this.outFileDirectory, { recursive: true });
       }
       await fs.promises.writeFile(`${this.outFileDirectory}/${this.outFileName}`, csvRows.join(os.EOL), "utf-8");
-      
+
       console.log("Export complete!!!");
     } else {
       console.log("ERR rows");

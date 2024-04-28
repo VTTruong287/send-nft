@@ -1,6 +1,7 @@
-import { MAX_RETRY_LIMIT, TokenID, TransactionReceiptStatus } from "@src/consts/config";
-import { ProcessStatusEnum, Row } from "./row";
+import { MAX_RETRY_LIMIT, TransactionReceiptStatus } from "@src/consts/config";
 import { Blockchain } from "@src/controllers";
+import { extractTokenIdAndAmount } from "@src/ultils";
+import { ProcessStatusEnum, Row } from "./row";
 
 export default class RowJob {
   public retry: number;
@@ -18,15 +19,22 @@ export default class RowJob {
 
   /**
    * process
-   * @returns 
+   * @returns
    */
   public async process() {
-    const tokenIds = [TokenID.NATURE, TokenID.FIRE, TokenID.WATER, TokenID.EARTH, TokenID.DARK, TokenID.LIGHTNING, TokenID.AETHER]
-    const transferAmounts = [this.row.nature, this.row.fire, this.row.water, this.row.earth, this.row.dark, this.row.lightning, this.row.aether]
+    // const tokenIds = [TokenID.NATURE, TokenID.FIRE, TokenID.WATER, TokenID.EARTH, TokenID.DARK, TokenID.LIGHTNING, TokenID.AETHER]
+    // const transferAmounts = [this.row.nature, this.row.fire, this.row.water, this.row.earth, this.row.dark, this.row.lightning, this.row.aether]
+    const { tokenIds, amounts: transferAmounts } = extractTokenIdAndAmount(this.row);
 
     while (this.retry < MAX_RETRY_LIMIT && this.row.status == ProcessStatusEnum.NONE) {
-      console.log('--- process: ', this.row.address, this.retry);
-      const data = await this.blockchain.safeBatchTransferFrom(this.fromAddress, process.env.PRIVATE_KEY, this.row.address, tokenIds, transferAmounts);
+      console.log("--- process: ", this.row.address, this.retry);
+      const data = await this.blockchain.safeBatchTransferFrom(
+        this.fromAddress,
+        process.env.PRIVATE_KEY,
+        this.row.address,
+        tokenIds,
+        transferAmounts
+      );
       if (data?.rs?.status) {
         this.row.transactionId = data.rs.transactionHash.toString();
 
@@ -36,9 +44,9 @@ export default class RowJob {
           return;
         }
       } else if (data?.errorMsg) {
-        this.row.errorMsg = data.errorMsg
+        this.row.errorMsg = data.errorMsg;
       }
-      if (this.retry >= MAX_RETRY_LIMIT - 1 ) {
+      if (this.retry >= MAX_RETRY_LIMIT - 1) {
         this.row.status = ProcessStatusEnum.FAIL;
         return;
       }
