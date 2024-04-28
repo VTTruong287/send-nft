@@ -36,6 +36,7 @@ const main = async () => {
   const mintAmounts = [spreadSheet.rows[0].nature, spreadSheet.rows[0].fire, spreadSheet.rows[0].water, spreadSheet.rows[0].earth, spreadSheet.rows[0].dark, spreadSheet.rows[0].lightning, spreadSheet.rows[0].aether]
   const addresses = tokenIds.map(() => fromAddress)
   const originBalances = await blockchain.getBalances(addresses, tokenIds)
+  const rowJobs: RowJob[] = [];
 
   console.log('originBalances: ', originBalances)
   if (originBalances?.length == 0) throw Error('--- Error getBalances')
@@ -55,17 +56,27 @@ const main = async () => {
   // Wait and check mint is enough
   for (let i = 0; i < mintAmounts.length; i++) {
     if (afterMintBalances[i] - originBalances[i] != mintAmounts[i]) {
+      // TODO: Burn for Rollback ???
       throw Error("Wrongly mint amount")
     }
   }
 
   // Transfer
+  for (let i = 0; i < spreadSheet.rows.length; i++) {
+    rowJobs.push(new RowJob(spreadSheet.rows[i], blockchain, fromAddress));
+  }
+
+  for (let rowJob of rowJobs) {
+    await rowJob.process();
+  }
 
   // Export
+  await spreadSheet.export();
 
 
-
-
+  const afterTransferBalances = await blockchain.getBalances(addresses, tokenIds)
+  if (afterTransferBalances?.length == 0) throw Error('--- Error getBalances')
+  console.log('afterTransferBalances: ', afterTransferBalances)
 
 
 

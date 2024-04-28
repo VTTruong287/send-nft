@@ -94,14 +94,14 @@ console.log('this.provider.utils.toHex(gasPrice + 1000000n): ', gasPrice + 10000
     if (ids.length == 0 || amounts.length == 0 || ids.length != amounts.length) throw Error("Wrong paramaters");
     try {
       console.log('minBatch params: ', fromAddress, ids, amounts)
-      var transfer = this.contract.methods.mintBatch(fromAddress, ids, amounts, []);
-      // var transfer = this.contract.methods.mint(fromAddress, ids[0], amounts[0], []);
-      var encodedABI = transfer.encodeABI();
+      const transfer = this.contract.methods.mintBatch(fromAddress, ids, amounts, []);
+      // const transfer = this.contract.methods.mint(fromAddress, ids[0], amounts[0], []);
+      const encodedABI = transfer.encodeABI();
 
-      const gasLimit = 2840000n; // Gas limit
+      const gasLimit = 584000n; // Gas limit
       const gasPrice = await this.provider.eth.getGasPrice();
 
-      var tx = {
+      const tx = {
         from: fromAddress,
         to: this.contractAddress,
         // gas: this.provider.utils.toHex(2000000),
@@ -111,29 +111,8 @@ console.log('this.provider.utils.toHex(gasPrice + 1000000n): ', gasPrice + 10000
       };
 
       const signed = await this.provider.eth.accounts.signTransaction(tx, privateKey);
-      // .then(signed => {
-      // tran.on('confirmation', (confirmationNumber: any) => {
-      //   console.log('confirmation: ', confirmationNumber);
-      //   // console.log('receipt: ', receipt);
-      // });
+      const tran = await this.provider.eth.sendSignedTransaction(signed.rawTransaction);
 
-      // tran.on('transactionHash', hash => {
-      //   console.log('hash');
-      //   console.log(hash);
-      // });
-
-      // tran.on('receipt', receipt => {
-      //   console.log('reciept');
-      //   console.log(receipt);
-      // });
-
-      // tran.on('error', console.error);
-      // });
-
-      var tran = await this.provider.eth.sendSignedTransaction(signed.rawTransaction);
-      // const rs = await this.contract.methods.mint("0xC6f9D937Bb6a6884004fAb2Fe139A1543Ee70a55", TokenID.WATER, 3n, []).send()
-
-      // console.log('--- Result: ', rs)
       return {
         rs: tran,
         errorMsg: "",
@@ -148,7 +127,40 @@ console.log('this.provider.utils.toHex(gasPrice + 1000000n): ', gasPrice + 10000
   }
 
   public async safeBatchTransferFrom(fromAddress: string, privateKey: string, toAddress: string, ids: bigint[], amounts: bigint[]) {
-    
+    if (!this.contract || !this.contractAddress) throw Error("Contract is not initialized!");
+    if (ids.length == 0 || amounts.length == 0 || ids.length != amounts.length) throw Error("Wrong paramaters");
+    try {
+      console.log('safeBatchTransferFrom params: ', fromAddress, toAddress, ids, amounts)
+      const transfer = this.contract.methods.safeBatchTransferFrom(fromAddress, toAddress, ids, amounts, []);
+      // const transfer = this.contract.methods.mint(fromAddress, ids[0], amounts[0], []);
+      const encodedABI = transfer.encodeABI();
+
+      const gasLimit = 584000n; // Gas limit
+      const gasPrice = await this.provider.eth.getGasPrice();
+
+      const tx = {
+        from: fromAddress,
+        to: this.contractAddress,
+        // gas: this.provider.utils.toHex(2000000),
+        gasLimit: this.provider.utils.toHex(gasLimit),
+        gasPrice: this.provider.utils.toHex(gasPrice + 10000000n),
+        data: encodedABI,
+      };
+
+      const signed = await this.provider.eth.accounts.signTransaction(tx, privateKey);
+      const tran = await this.provider.eth.sendSignedTransaction(signed.rawTransaction);
+
+      return {
+        rs: tran,
+        errorMsg: "",
+      };
+    } catch (error) {
+      console.log('Error - getBalances: ', error)
+      return {
+        rs: null,
+        errorMsg: `Code: ${error.code} - Content: ${error.message}`,
+      };
+    }
   }
 
   /**
